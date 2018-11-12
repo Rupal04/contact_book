@@ -1,8 +1,7 @@
 import logging
 
 from contact.models import ContactList
-from contact.response import PublishContactResponse, DeleteContactResponse, UpdateContactResponse
-
+from contact.response import PublishContactResponse
 logger =logging.getLogger(__name__)
 
 def to_dict(obj):
@@ -75,8 +74,7 @@ def update_contact(c_id, **kwargs):
 
         contact_obj.save()
 
-        response = UpdateContactResponse(contact_obj)
-        return response
+        return "Contact updated successfully."
 
     except Exception as e:
         logger.error("Unable to update contact." + str(e), exc_info=True)
@@ -84,11 +82,12 @@ def update_contact(c_id, **kwargs):
 
 def delete_contact(c_id):
     try:
-        contact_obj = ContactList.objects.get(id = c_id)
-        contact_obj.delete()
-
-        response = DeleteContactResponse()
-        return response
+        contact_obj = ContactList.objects.filter(id = c_id).first()
+        if not contact_obj:
+            return None
+        else:
+            contact_obj.delete()
+            return "Contact Deleted successfully."
 
     except Exception as e:
         logger.error("Unable to delete contact." + str(e), exc_info=True)

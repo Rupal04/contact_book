@@ -51,7 +51,7 @@ class ContactViewSet(viewsets.ViewSet):
             data = request.data
             query_params = request.query_params
 
-            c_id = query_params['contact_id']
+            c_id = pk
             phone_number = int(data.get("number", 0))
             contact_name = data.get("name", "")
             contact_email = data.get("email", "")
@@ -63,8 +63,7 @@ class ContactViewSet(viewsets.ViewSet):
                 response = FailureResponse(msg="Unable to update contact")
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            response = SuccessResponse(results=update_contact_response,
-                                       msg="Contact updated sucessfully.")
+            response = SuccessResponse(results=update_contact_response)
             return Response(to_dict(response))
 
         except Exception as e:
@@ -79,15 +78,14 @@ class ContactViewSet(viewsets.ViewSet):
                 response = SuccessResponse(msg="Missing Contact ID")
                 return Response(to_dict(response), status=status.HTTP_400_BAD_REQUEST)
 
-            contact_id = int(request.query_params.get("contact_id", 0))
 
-            delete_contact_response = delete_contact(id = contact_id)
+            delete_contact_response = delete_contact(pk)
 
             if not delete_contact_response:
-                response = FailureResponse(msg="Unable to delete contact")
+                response = FailureResponse(msg="Unable to delete contact.Maybe No Contact with this ID exists.")
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            response = SuccessResponse(results=delete_contact_response, msg="Contact deleted sucessfully.")
+            response = SuccessResponse(results=delete_contact_response)
             return Response(to_dict(response))
 
         except Exception as e:

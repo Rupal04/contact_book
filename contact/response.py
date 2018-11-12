@@ -14,13 +14,3 @@ class FailureResponse(object):
 class PublishContactResponse(object):
     def __init__(self,contact_list):
         self.id = contact_list.id
-
-class DeleteContactResponse(object):
-    def __init__(self, msg = "Contact Deleted successfully"):
-        self.msg = msg
-        self.success = True
-
-class UpdateContactResponse(object):
-    def __init__(self, msg = "Contact Updated successfully"):
-        self.msg = msg
-        self.success = True
