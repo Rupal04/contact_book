@@ -1,5 +1,7 @@
 import logging
 
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from contact.response import SuccessResponse, FailureResponse
 from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact
 from rest_framework import viewsets,status
@@ -8,6 +10,8 @@ from rest_framework.response import Response
 logger = logging.getLogger(__name__)
 
 class ContactViewSet(viewsets.ViewSet):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
 
     def create(self,request):
         try:
