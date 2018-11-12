@@ -13,6 +13,7 @@ class ContactViewSet(viewsets.ViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
+    # add contact
     def create(self,request):
         try:
             data = request.data
@@ -36,6 +37,7 @@ class ContactViewSet(viewsets.ViewSet):
             response = FailureResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # retrieve all contact list
     def list(self,request):
         try:
             contact_list_response = get_contacts()
@@ -45,6 +47,7 @@ class ContactViewSet(viewsets.ViewSet):
             response = FailureResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # update contact
     def update(self, request, pk=None):
         try:
             if not pk:
@@ -75,6 +78,7 @@ class ContactViewSet(viewsets.ViewSet):
             response = FailureResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # delete contact
     def destroy(self,request, pk=None):
         try:
             if not pk:
