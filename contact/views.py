@@ -1,17 +1,14 @@
 import logging
 
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
 from contact.response import SuccessResponse, FailureResponse
-from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact
+from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact, search_contact
 from rest_framework import viewsets,status
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
 class ContactViewSet(viewsets.ViewSet):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
 
     # add contact
     def create(self,request):
@@ -41,6 +38,11 @@ class ContactViewSet(viewsets.ViewSet):
     def list(self,request):
         try:
             contact_list_response = get_contacts()
+
+            if not contact_list_response:
+                response = FailureResponse(msg="No contact for the particular search has been found.")
+                return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
             return Response(to_dict(SuccessResponse(results=contact_list_response)))
         except Exception as e:
             logger.error("Some Exception occured.Error is " + str(e), exc_info=True)
@@ -100,6 +102,34 @@ class ContactViewSet(viewsets.ViewSet):
             logger.error("Some Exception occured.Error is "+str(e), exc_info = True)
             response = FailureResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# search specific contact with name and email
+@api_view(['GET'])
+def search_particular_contact(request):
+    try:
+        query_params = request.query_params
+        contact_name = ""
+        contact_email = ""
+
+        if 'name' in query_params:
+            contact_name = query_params["name"]
+
+        if 'email' in query_params:
+            contact_email = query_params["email"]
+
+        contact_list_response = search_contact(contact_name=contact_name, contact_email=contact_email)
+
+        if not contact_list_response:
+            response = FailureResponse(msg="No contact for the particular search has been found.")
+            return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(to_dict(SuccessResponse(results=contact_list_response)))
+
+    except Exception as e:
+        logger.error("Some Exception occured.Error is " + str(e), exc_info=True)
+        response = FailureResponse()
+        return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

@@ -102,3 +102,17 @@ def get_contacts():
         contact_obj_list.append(contact_obj_dict)
     return contact_obj_list
 
+def search_contact(**kwargs):
+    if kwargs["contact_name"] != "":
+        contact_obj = ContactList.objects.filter(name__contains= kwargs["contact_name"])
+    elif kwargs["contact_email"] != "":
+        contact_obj = ContactList.objects.filter(name__contains=kwargs["contact_email"])
+
+    contact_obj_list = []
+    # TODO :size is still to be done
+    for contacts in contact_obj:
+        contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}
+        contact_obj_list.append(contact_obj_dict)
+    return contact_obj_list
+
+
