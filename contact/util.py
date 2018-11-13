@@ -40,8 +40,7 @@ def create_contact(**kwargs):
     try:
         number = kwargs["phone_number"]
         email = kwargs["contact_email"]
-        contact_lis_obj = ContactList.objects.filter(email=email)
-        if not contact_lis_obj:
+        if not ContactList.objects.filter(email=email):
             contact_obj = ContactList.objects.create(number=number, email=email)
         else:
             response = ErrorResponse(msg=ErrorConstants.CONTACT_WITH_PROVIDED_EMAIL_EXIST)
