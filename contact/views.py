@@ -1,40 +1,41 @@
 import logging
 
-from contact.constants import ErrorConstants, SuccessConstants, Warn
+from contact.constants import ErrorConstants, Warn
 from contact.response import SuccessResponse, ErrorResponse, ContactListResponse
 from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact, search_contact
-from rest_framework import viewsets,status
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
-class ContactViewSet(viewsets.ViewSet):
 
+class ContactViewSet(viewsets.ViewSet):
     # add contact
-    def create(self,request):
+    def create(self, request):
         try:
             data = request.data
 
-            phone_number = int(data.get("number",0))
-            contact_name = data.get("name","")
+            phone_number = int(data.get("number", 0))
+            contact_name = data.get("name", "")
             contact_email = data.get("email")
 
             if contact_email is None:
-                response = ErrorResponse(msg= ErrorConstants.EMAIL_NOT_PROVIDED)
-                return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                response = ErrorResponse(msg=ErrorConstants.EMAIL_NOT_PROVIDED)
+                return Response(to_dict(response), status=status.HTTP_400_BAD_REQUEST)
 
-            create_contact_response = create_contact(phone_number = phone_number, contact_name = contact_name, contact_email = contact_email)
+            create_contact_response = create_contact(phone_number=phone_number, contact_name=contact_name,
+                                                     contact_email=contact_email)
 
             if not create_contact_response:
-                response = ErrorResponse(msg = ErrorConstants.CONTACT_CREATION_ERROR)
-                return  Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            elif create_contact_response.success is False :
-                response = ErrorResponse(msg=create_contact_response.msg)
+                response = ErrorResponse(msg=ErrorConstants.CONTACT_CREATION_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return  Response(to_dict(create_contact_response))
+            elif create_contact_response.success is False:
+                response = ErrorResponse(msg=create_contact_response.msg)
+                return Response(to_dict(response), status=status.HTTP_202_ACCEPTED)
+
+            return Response(to_dict(create_contact_response), status=status.HTTP_200_OK)
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
@@ -42,15 +43,15 @@ class ContactViewSet(viewsets.ViewSet):
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # retrieve all contact list
-    def list(self,request):
+    def list(self, request):
         try:
             contact_list_response = get_contacts()
 
             if not contact_list_response:
-                response = ErrorResponse(msg= ErrorConstants.CONTACT_NOT_FOUND)
-                return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
+                return Response(to_dict(response), status=status.HTTP_404_NOT_FOUND)
 
-            return Response(to_dict(ContactListResponse(results=contact_list_response)))
+            return Response(to_dict(ContactListResponse(results=contact_list_response)), status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
             response = ErrorResponse()
@@ -60,8 +61,8 @@ class ContactViewSet(viewsets.ViewSet):
     def update(self, request, pk=None):
         try:
             if not pk:
-                logger.warn(Warn.CONTACT_ID_REQUIRED)
-                response = SuccessResponse(msg= ErrorConstants.CONTACT_ID_MISSING)
+                logger.warning(Warn.CONTACT_ID_REQUIRED)
+                response = SuccessResponse(msg=ErrorConstants.CONTACT_ID_MISSING)
                 return Response(to_dict(response), status=status.HTTP_400_BAD_REQUEST)
 
             data = request.data
@@ -78,18 +79,18 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg=ErrorConstants.CONTACT_UPDATE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response(to_dict(update_contact_response))
+            return Response(to_dict(update_contact_response), status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
             response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # delete contact
-    def destroy(self,request, pk=None):
+    def destroy(self, request, pk=None):
         try:
             if not pk:
-                logger.warn(Warn.CONTACT_ID_REQUIRED)
-                response = SuccessResponse(msg= ErrorConstants.CONTACT_ID_MISSING)
+                logger.warning(Warn.CONTACT_ID_REQUIRED)
+                response = SuccessResponse(msg=ErrorConstants.CONTACT_ID_MISSING)
                 return Response(to_dict(response), status=status.HTTP_400_BAD_REQUEST)
 
             delete_contact_response = delete_contact(pk)
@@ -98,7 +99,7 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg=ErrorConstants.CONTACT_DELETE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response(to_dict(delete_contact_response))
+            return Response(to_dict(delete_contact_response), status=status.HTTP_200_OK)
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
@@ -126,15 +127,9 @@ def search_particular_contact(request):
             response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(to_dict(ContactListResponse(results=contact_list_response)))
+        return Response(to_dict(ContactListResponse(results=contact_list_response)), status=status.HTTP_200_OK)
 
     except Exception as e:
         logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
         response = ErrorResponse()
         return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
-
-
