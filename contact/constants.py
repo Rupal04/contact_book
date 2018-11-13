@@ -10,6 +10,8 @@ class ErrorConstants(object):
     CONTACT_DELETE_ERROR = "Unable to delete contact.Maybe No Contact with this ID exists."
     CONTACT_NOT_FOUND = "No contact for the particular search has been found."
     CONTACT_ID_MISSING = "Missing Contact ID"
+    EMAIL_NOT_PROVIDED = "Please provide email!"
+    CONTACT_WITH_PROVIDED_EMAIL_EXIST = "Contact with the given email already exists."
 
 
 class Warn(object):

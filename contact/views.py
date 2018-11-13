@@ -16,15 +16,23 @@ class ContactViewSet(viewsets.ViewSet):
         try:
             data = request.data
 
-            phone_number = int(data.get("number",0))
+            phone_number = int(data.get("number"))
             contact_name = data.get("name","")
-            contact_email = data.get("email", "")
+            contact_email = data.get("email")
+
+            if contact_email is None:
+                response = ErrorResponse(msg= ErrorConstants.EMAIL_NOT_PROVIDED)
+                return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             create_contact_response = create_contact(phone_number = phone_number, contact_name = contact_name, contact_email = contact_email)
 
             if not create_contact_response:
                 response = ErrorResponse(msg = ErrorConstants.CONTACT_CREATION_ERROR)
                 return  Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            if create_contact_response.success is False :
+                response = ErrorResponse(msg=create_contact_response.msg)
+                return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             response = SuccessResponse(results = create_contact_response, msg = SuccessConstants.CONTACT_CREATION_SUCCESS)
             return  Response(to_dict(response))

@@ -2,7 +2,8 @@ import logging
 
 from contact.constants import ErrorConstants, SuccessConstants
 from contact.models import ContactList
-from contact.response import PublishContactResponse
+from contact.response import PublishContactResponse, ErrorResponse
+
 logger =logging.getLogger(__name__)
 
 def to_dict(obj):
@@ -37,15 +38,16 @@ def to_dict(obj):
 def create_contact(**kwargs):
     try:
         number = kwargs["phone_number"]
-        contact_obj = ContactList.objects.create(number=number)
+        email = kwargs["contact_email"]
+        if ContactList.objects.filter(email=email) is None:
+            contact_obj = ContactList.objects.create(number=number,email = email)
+        else:
+            response = ErrorResponse(msg = ErrorConstants.CONTACT_WITH_PROVIDED_EMAIL_EXIST)
+            return response
 
         if kwargs["contact_name"] != "":
             name = kwargs["contact_name"]
             contact_obj.name = name
-
-        if kwargs["contact_email"] != "":
-            email = kwargs["contact_email"]
-            contact_obj.email =email
 
         contact_obj.save()
 
