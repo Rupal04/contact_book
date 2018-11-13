@@ -122,9 +122,11 @@ def search_contact(**kwargs):
     try:
         contact_obj = ""
         if kwargs["contact_name"] != "":
-            contact_obj = ContactList.objects.filter(name__contains=kwargs["contact_name"])
+            contact_name = kwargs["contact_name"].encode('utf-8')
+            contact_obj = ContactList.objects.filter(name__contains=contact_name)
         elif kwargs["contact_email"] != "":
-            contact_obj = ContactList.objects.filter(name__contains=kwargs["contact_email"])
+            contact_email = kwargs["contact_email"].encode('utf-8')
+            contact_obj = ContactList.objects.filter(email__contains=contact_email)
 
         contact_obj_list = []
         # TODO :size is still to be done
