@@ -1,9 +1,11 @@
 class SuccessConstants(object):
+    SUCCESS_RESPONSE = "Successful"
     CONTACT_UPDATE_SUCCESS = "Contact updated successfully."
     CONTACT_DELETE_SUCCESS = "Contact Deleted successfully."
     CONTACT_CREATION_SUCCESS = "Contact Created successfully."
 
 class ErrorConstants(object):
+    ERROR_RESPONSE = "Error"
     EXCEPTIONAL_ERROR = "Some Exception occured.Error is "
     CONTACT_CREATION_ERROR = "Unable to create contact."
     CONTACT_UPDATE_ERROR = "Unable to update contact."

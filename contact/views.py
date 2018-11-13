@@ -1,7 +1,7 @@
 import logging
 
 from contact.constants import ErrorConstants, SuccessConstants, Warn
-from contact.response import SuccessResponse, ErrorResponse
+from contact.response import SuccessResponse, ErrorResponse, ContactListResponse
 from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact, search_contact
 from rest_framework import viewsets,status
 from rest_framework.response import Response
@@ -16,7 +16,7 @@ class ContactViewSet(viewsets.ViewSet):
         try:
             data = request.data
 
-            phone_number = int(data.get("number"))
+            phone_number = int(data.get("number",0))
             contact_name = data.get("name","")
             contact_email = data.get("email")
 
@@ -30,12 +30,11 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg = ErrorConstants.CONTACT_CREATION_ERROR)
                 return  Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            if create_contact_response.success is False :
+            elif create_contact_response.success is False :
                 response = ErrorResponse(msg=create_contact_response.msg)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            response = SuccessResponse(results = create_contact_response, msg = SuccessConstants.CONTACT_CREATION_SUCCESS)
-            return  Response(to_dict(response))
+            return  Response(to_dict(create_contact_response))
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
@@ -51,7 +50,7 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg= ErrorConstants.CONTACT_NOT_FOUND)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response(to_dict(SuccessResponse(results=contact_list_response)))
+            return Response(to_dict(ContactListResponse(results=contact_list_response)))
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
             response = ErrorResponse()
@@ -79,9 +78,7 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg=ErrorConstants.CONTACT_UPDATE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            response = SuccessResponse(results=update_contact_response)
-            return Response(to_dict(response))
-
+            return Response(to_dict(update_contact_response))
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
             response = ErrorResponse()
@@ -101,8 +98,7 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg=ErrorConstants.CONTACT_DELETE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            response = SuccessResponse(results=delete_contact_response)
-            return Response(to_dict(response))
+            return Response(to_dict(delete_contact_response))
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
@@ -110,7 +106,7 @@ class ContactViewSet(viewsets.ViewSet):
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# search specific contact with name and email
+# search specific contact with name/email
 @api_view(['GET'])
 def search_particular_contact(request):
     try:
@@ -130,7 +126,7 @@ def search_particular_contact(request):
             response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(to_dict(SuccessResponse(results=contact_list_response)))
+        return Response(to_dict(ContactListResponse(results=contact_list_response)))
 
     except Exception as e:
         logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)

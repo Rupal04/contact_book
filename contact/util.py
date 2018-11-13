@@ -2,7 +2,7 @@ import logging
 
 from contact.constants import ErrorConstants, SuccessConstants
 from contact.models import ContactList
-from contact.response import PublishContactResponse, ErrorResponse
+from contact.response import PublishContactResponse, ErrorResponse, SuccessResponse
 
 logger =logging.getLogger(__name__)
 
@@ -39,7 +39,8 @@ def create_contact(**kwargs):
     try:
         number = kwargs["phone_number"]
         email = kwargs["contact_email"]
-        if ContactList.objects.filter(email=email) is None:
+        contact_lis_obj  = ContactList.objects.filter(email=email)
+        if not contact_lis_obj:
             contact_obj = ContactList.objects.create(number=number,email = email)
         else:
             response = ErrorResponse(msg = ErrorConstants.CONTACT_WITH_PROVIDED_EMAIL_EXIST)
@@ -77,7 +78,8 @@ def update_contact(c_id, **kwargs):
 
         contact_obj.save()
 
-        return SuccessConstants.CONTACT_UPDATE_SUCCESS
+        response = SuccessResponse(msg=SuccessConstants.CONTACT_UPDATE_SUCCESS)
+        return response
 
     except Exception as e:
         logger.error(ErrorConstants.CONTACT_UPDATE_ERROR + str(e), exc_info=True)
@@ -90,7 +92,8 @@ def delete_contact(c_id):
             return None
         else:
             contact_obj.delete()
-            return SuccessConstants.CONTACT_DELETE_SUCCESS
+            response = SuccessResponse(msg=SuccessConstants.CONTACT_DELETE_SUCCESS)
+            return response
 
     except Exception as e:
         logger.error(ErrorConstants.CONTACT_DELETE_ERROR + str(e), exc_info=True)
