@@ -1,5 +1,6 @@
 import logging
 
+from contact.constants import ErrorConstants, SuccessConstants
 from contact.models import ContactList
 from contact.response import PublishContactResponse
 logger =logging.getLogger(__name__)
@@ -52,7 +53,7 @@ def create_contact(**kwargs):
         return response
 
     except Exception as e:
-        logger.error("Unable to create contact." + str(e), exc_info = True)
+        logger.error(ErrorConstants.CONTACT_CREATION_ERROR + str(e), exc_info = True)
         return None
 
 def update_contact(c_id, **kwargs):
@@ -74,10 +75,10 @@ def update_contact(c_id, **kwargs):
 
         contact_obj.save()
 
-        return "Contact updated successfully."
+        return SuccessConstants.CONTACT_UPDATE_SUCCESS
 
     except Exception as e:
-        logger.error("Unable to update contact." + str(e), exc_info=True)
+        logger.error(ErrorConstants.CONTACT_UPDATE_ERROR + str(e), exc_info=True)
         return None
 
 def delete_contact(c_id):
@@ -87,10 +88,10 @@ def delete_contact(c_id):
             return None
         else:
             contact_obj.delete()
-            return "Contact Deleted successfully."
+            return SuccessConstants.CONTACT_DELETE_SUCCESS
 
     except Exception as e:
-        logger.error("Unable to delete contact." + str(e), exc_info=True)
+        logger.error(ErrorConstants.CONTACT_DELETE_ERROR + str(e), exc_info=True)
         return None
 
 def get_contacts():
