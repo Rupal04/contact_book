@@ -9,7 +9,7 @@ class ErrorConstants(object):
     ERROR_RESPONSE = "Error"
     EXCEPTIONAL_ERROR = "Some Unexpected Exception Occured. Error is "
     CONTACT_CREATION_ERROR = "Unable to create contact."
-    CONTACT_UPDATE_ERROR = "Unable to update contact."
+    CONTACT_UPDATE_ERROR = "Unable to update contact. Maybe No Contact with this ID exists."
     CONTACT_DELETE_ERROR = "Unable to delete contact. Maybe No Contact with this ID exists."
     CONTACT_NOT_FOUND = "No contact for the particular search has been found."
     CONTACT_ID_MISSING = "Missing Contact ID"
@@ -21,4 +21,3 @@ class ErrorConstants(object):
 
 class Warn(object):
     CONTACT_ID_REQUIRED = "Contact ID required "
-
