@@ -1,7 +1,7 @@
 import logging
 
 from contact.constants import ErrorConstants, SuccessConstants, Warn
-from contact.response import SuccessResponse, FailureResponse
+from contact.response import SuccessResponse, ErrorResponse
 from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact, search_contact
 from rest_framework import viewsets,status
 from rest_framework.response import Response
@@ -23,7 +23,7 @@ class ContactViewSet(viewsets.ViewSet):
             create_contact_response = create_contact(phone_number = phone_number, contact_name = contact_name, contact_email = contact_email)
 
             if not create_contact_response:
-                response = FailureResponse(msg = ErrorConstants.CONTACT_CREATION_ERROR)
+                response = ErrorResponse(msg = ErrorConstants.CONTACT_CREATION_ERROR)
                 return  Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             response = SuccessResponse(results = create_contact_response, msg = SuccessConstants.CONTACT_CREATION_SUCCESS)
@@ -31,7 +31,7 @@ class ContactViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
-            response = FailureResponse()
+            response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # retrieve all contact list
@@ -40,13 +40,13 @@ class ContactViewSet(viewsets.ViewSet):
             contact_list_response = get_contacts()
 
             if not contact_list_response:
-                response = FailureResponse(msg= ErrorConstants.CONTACT_NOT_FOUND)
+                response = ErrorResponse(msg= ErrorConstants.CONTACT_NOT_FOUND)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             return Response(to_dict(SuccessResponse(results=contact_list_response)))
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
-            response = FailureResponse()
+            response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # update contact
@@ -68,7 +68,7 @@ class ContactViewSet(viewsets.ViewSet):
                                                      contact_email=contact_email)
 
             if not update_contact_response:
-                response = FailureResponse(msg=ErrorConstants.CONTACT_UPDATE_ERROR)
+                response = ErrorResponse(msg=ErrorConstants.CONTACT_UPDATE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             response = SuccessResponse(results=update_contact_response)
@@ -76,7 +76,7 @@ class ContactViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
-            response = FailureResponse()
+            response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # delete contact
@@ -90,7 +90,7 @@ class ContactViewSet(viewsets.ViewSet):
             delete_contact_response = delete_contact(pk)
 
             if not delete_contact_response:
-                response = FailureResponse(msg=ErrorConstants.CONTACT_DELETE_ERROR)
+                response = ErrorResponse(msg=ErrorConstants.CONTACT_DELETE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             response = SuccessResponse(results=delete_contact_response)
@@ -98,7 +98,7 @@ class ContactViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
-            response = FailureResponse()
+            response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -119,14 +119,14 @@ def search_particular_contact(request):
         contact_list_response = search_contact(contact_name=contact_name, contact_email=contact_email)
 
         if not contact_list_response:
-            response = FailureResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
+            response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(to_dict(SuccessResponse(results=contact_list_response)))
 
     except Exception as e:
         logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
-        response = FailureResponse()
+        response = ErrorResponse()
         return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -1,12 +1,12 @@
 class SuccessResponse(object):
-    def __init__(self, results=None, msg = "Successfull"):
+    def __init__(self, results=None, msg = "Successful"):
         if results is not None:
             self.results = results
         self.msg = msg
         self.success = True
 
-class FailureResponse(object):
-    def __init__(self, msg = "error"):
+class ErrorResponse(object):
+    def __init__(self, msg = "Error"):
         self.msg = msg
         self.success = False
 
