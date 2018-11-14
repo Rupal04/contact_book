@@ -106,7 +106,6 @@ def get_contacts():
     try:
         contact_obj = ContactList.objects.all()
         contact_obj_list = []
-        # TODO :size is still to be done
         for contacts in contact_obj:
             contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}
             contact_obj_list.append(contact_obj_dict)
@@ -114,26 +113,4 @@ def get_contacts():
 
     except Exception as e:
         logger.error(ErrorConstants.CONTACT_LISTING_ERROR + str(e), exc_info=True)
-        return None
-
-
-def search_contact(**kwargs):
-    try:
-        contact_obj = ""
-        if kwargs["contact_name"] != "":
-            contact_name = kwargs["contact_name"].encode('utf-8')
-            contact_obj = ContactList.objects.filter(name__contains=contact_name)
-        elif kwargs["contact_email"] != "":
-            contact_email = kwargs["contact_email"].encode('utf-8')
-            contact_obj = ContactList.objects.filter(email__contains=contact_email)
-
-        contact_obj_list = []
-        # TODO :size is still to be done
-        for contacts in contact_obj:
-            contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}
-            contact_obj_list.append(contact_obj_dict)
-        return contact_obj_list
-
-    except Exception as e:
-        logger.error(ErrorConstants.CONTACT_SEARCHING_ERROR + str(e), exc_info=True)
         return None

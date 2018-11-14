@@ -1,8 +1,12 @@
 import logging
 
+import django_filters
+
 from contact.constants import ErrorConstants, Warn
+from contact.models import ContactList
 from contact.response import SuccessResponse, ErrorResponse, ContactListResponse
-from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact, search_contact
+from contact.serializer import SearchContactSerializer
+from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -106,30 +110,22 @@ class ContactViewSet(viewsets.ViewSet):
             response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# search contact with name/email
+class SearchContactViewSet(viewsets.ModelViewSet):
+    serializer_class = SearchContactSerializer
 
-# search specific contact with name/email
-@api_view(['GET'])
-def search_particular_contact(request):
-    try:
-        query_params = request.query_params
-        contact_name = ""
-        contact_email = ""
+    def get_queryset(self):
+        queryset = ContactList.objects.all()
+        name = self.request.query_params.get('name', None)
+        email = self.request.query_params.get('email', None)
 
-        if 'name' in query_params:
-            contact_name = query_params["name"]
+        if name is not None:
+            queryset = queryset.filter(name__icontains=name)
+        if email is not None:
+            queryset = queryset.filter(email__icontains=email)
 
-        if 'email' in query_params:
-            contact_email = query_params["email"]
+        return queryset
 
-        contact_list_response = search_contact(contact_name=contact_name, contact_email=contact_email)
 
-        if not contact_list_response:
-            response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
-            return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(to_dict(ContactListResponse(results=contact_list_response)), status=status.HTTP_200_OK)
 
-    except Exception as e:
-        logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
-        response = ErrorResponse()
-        return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
