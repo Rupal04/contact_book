@@ -1,8 +1,12 @@
 import logging
 
 from contact.constants import ErrorConstants, SuccessConstants
+from contact.keys import CacheNameSpace, get_contact_list
 from contact.models import ContactList
 from contact.response import PublishContactResponse, ErrorResponse, SuccessResponse
+from django.core.cache import cache
+
+from contact_book.settings import CACHE_TTL
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +108,12 @@ def delete_contact(c_id):
 
 def get_contacts():
     try:
-        contact_obj = ContactList.objects.all()
+        if 'contact_list' in cache:
+            contact_obj = cache.get('contact_list')
+        else:
+            contact_obj = ContactList.objects.all()
+            cache.set(get_contact_list(), contact_obj, CacheNameSpace.CONTACT_LIST[1])
+
         contact_obj_list = []
         for contacts in contact_obj:
             contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}

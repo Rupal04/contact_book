@@ -1,7 +1,5 @@
 import logging
 
-import django_filters
-
 from contact.constants import ErrorConstants, Warn
 from contact.models import ContactList
 from contact.response import SuccessResponse, ErrorResponse, ContactListResponse
@@ -9,10 +7,12 @@ from contact.serializer import SearchContactSerializer
 from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+
+from contact_book import settings
 
 logger = logging.getLogger(__name__)
-
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 class ContactViewSet(viewsets.ViewSet):
     # add contact
@@ -109,6 +109,7 @@ class ContactViewSet(viewsets.ViewSet):
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
             response = ErrorResponse()
             return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # search contact with name/email
 class SearchContactViewSet(viewsets.ModelViewSet):
