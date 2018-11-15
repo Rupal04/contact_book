@@ -7,12 +7,9 @@ from contact.serializer import SearchContactSerializer
 from contact.util import create_contact, to_dict, delete_contact, get_contacts, update_contact
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
-from contact_book import settings
 
 logger = logging.getLogger(__name__)
-CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 class ContactViewSet(viewsets.ViewSet):
     # add contact

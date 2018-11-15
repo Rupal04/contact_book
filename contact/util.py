@@ -1,12 +1,13 @@
+import redis
 import logging
+import json
 
 from contact.constants import ErrorConstants, SuccessConstants
 from contact.keys import CacheNameSpace, get_contact_list
 from contact.models import ContactList
 from contact.response import PublishContactResponse, ErrorResponse, SuccessResponse
-from django.core.cache import cache
 
-from contact_book.settings import CACHE_TTL
+r_cache = redis.StrictRedis()
 
 logger = logging.getLogger(__name__)
 
@@ -108,17 +109,20 @@ def delete_contact(c_id):
 
 def get_contacts():
     try:
-        if 'contact_list' in cache:
-            contact_obj = cache.get('contact_list')
+        contact_obj_list = []
+        if 'contact_list' in r_cache:
+            contact_obj_list_json = r_cache.get('contact_list')
+
         else:
             contact_obj = ContactList.objects.all()
-            cache.set(get_contact_list(), contact_obj, CacheNameSpace.CONTACT_LIST[1])
 
-        contact_obj_list = []
-        for contacts in contact_obj:
-            contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}
-            contact_obj_list.append(contact_obj_dict)
-        return contact_obj_list
+            for contacts in contact_obj:
+                contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}
+                contact_obj_list.append(contact_obj_dict)
+                contact_obj_list_json = json.dumps(contact_obj_list)
+            r_cache.set(get_contact_list(), contact_obj_list_json, CacheNameSpace.CONTACT_LIST[1])
+
+        return json.loads(contact_obj_list_json)
 
     except Exception as e:
         logger.error(ErrorConstants.CONTACT_LISTING_ERROR + str(e), exc_info=True)
