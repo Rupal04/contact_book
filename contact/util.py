@@ -109,15 +109,13 @@ def delete_contact(c_id):
 
 def get_contacts():
     try:
-        contact_obj_list = []
         if 'contact_list' in r_cache:
             contact_obj_list_json = r_cache.get('contact_list')
-
         else:
             contact_obj = ContactList.objects.all()
-
+            contact_obj_list = []
             for contacts in contact_obj:
-                contact_obj_dict = {"name": contacts.name, "number": contacts.number, "email": contacts.email}
+                contact_obj_dict = {"id": contacts.id, "name": contacts.name, "number": contacts.number, "email": contacts.email}
                 contact_obj_list.append(contact_obj_dict)
                 contact_obj_list_json = json.dumps(contact_obj_list)
             r_cache.set(get_contact_list(), contact_obj_list_json, CacheNameSpace.CONTACT_LIST[1])
