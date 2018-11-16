@@ -16,7 +16,6 @@ class ErrorConstants(object):
     EMAIL_NOT_PROVIDED = "Please provide email!"
     CONTACT_WITH_PROVIDED_EMAIL_EXIST = "Contact with the given email already exists."
     CONTACT_LISTING_ERROR = "Error in listing contacts."
-    CONTACT_SEARCHING_ERROR = "Error in searching contact."
 
 
 class Warn(object):
