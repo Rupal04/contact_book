@@ -49,10 +49,14 @@ class ContactViewSet(viewsets.ViewSet):
             contact_list_response = get_contacts()
 
             if not contact_list_response:
-                response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
+                response = ErrorResponse(msg=ErrorConstants.CONTACT_LISTING_ERROR)
                 return Response(to_dict(response), status=status.HTTP_404_NOT_FOUND)
 
-            return Response(to_dict(ContactListResponse(results=contact_list_response)), status=status.HTTP_200_OK)
+            elif contact_list_response.success is False:
+                response = ErrorResponse(msg=contact_list_response.msg)
+                return Response(to_dict(response), status=status.HTTP_202_ACCEPTED)
+
+            return Response(to_dict(contact_list_response), status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
             response = ErrorResponse()
@@ -80,6 +84,10 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg=ErrorConstants.CONTACT_UPDATE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            elif update_contact_response.success is False:
+                response = ErrorResponse(msg=update_contact_response.msg)
+                return Response(to_dict(response), status=status.HTTP_202_ACCEPTED)
+
             return Response(to_dict(update_contact_response), status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
@@ -100,6 +108,10 @@ class ContactViewSet(viewsets.ViewSet):
                 response = ErrorResponse(msg=ErrorConstants.CONTACT_DELETE_ERROR)
                 return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            elif delete_contact_response.success is False:
+                response = ErrorResponse(msg=delete_contact_response.msg)
+                return Response(to_dict(response), status=status.HTTP_202_ACCEPTED)
+
             return Response(to_dict(delete_contact_response), status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -113,16 +125,22 @@ class SearchContactViewSet(viewsets.ModelViewSet):
     serializer_class = SearchContactSerializer
 
     def get_queryset(self):
-        queryset = ContactList.objects.all()
-        name = self.request.query_params.get('name', None)
-        email = self.request.query_params.get('email', None)
+        try:
+            queryset = ContactList.objects.all()
+            name = self.request.query_params.get('name', None)
+            email = self.request.query_params.get('email', None)
 
-        if name is not None:
-            queryset = queryset.filter(name__icontains=name)
-        if email is not None:
-            queryset = queryset.filter(email__icontains=email)
+            if name is not None:
+                queryset = queryset.filter(name__icontains=name)
+            if email is not None:
+                queryset = queryset.filter(email__icontains=email)
 
-        return queryset
+            return queryset
+
+        except Exception as e:
+            logger.error(ErrorConstants.EXCEPTIONAL_ERROR + str(e), exc_info=True)
+            response = ErrorResponse()
+            return Response(to_dict(response), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

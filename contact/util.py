@@ -5,7 +5,7 @@ import json
 from contact.constants import ErrorConstants, SuccessConstants
 from contact.keys import CacheNameSpace, get_contact_list
 from contact.models import ContactList
-from contact.response import PublishContactResponse, ErrorResponse, SuccessResponse
+from contact.response import PublishContactResponse, ErrorResponse, SuccessResponse, ContactListResponse
 
 r_cache = redis.StrictRedis()
 
@@ -67,24 +67,27 @@ def create_contact(**kwargs):
 
 def update_contact(c_id, **kwargs):
     try:
-        contact_id = c_id
-        contact_obj = ContactList.objects.get(id=contact_id)
+        contact_obj = ContactList.objects.filter(id=c_id).first()
+        if contact_obj:
+            if kwargs['phone_number']:
+                number = kwargs['phone_number']
+                contact_obj.number = number
 
-        if kwargs['phone_number']:
-            number = kwargs['phone_number']
-            contact_obj.number = number
+            if kwargs["contact_name"]:
+                name = kwargs["contact_name"]
+                contact_obj.name = name
 
-        if kwargs["contact_name"]:
-            name = kwargs["contact_name"]
-            contact_obj.name = name
+            if kwargs["contact_email"]:
+                email = kwargs["contact_email"]
+                contact_obj.email = email
 
-        if kwargs["contact_email"]:
-            email = kwargs["contact_email"]
-            contact_obj.email = email
+            contact_obj.save()
 
-        contact_obj.save()
+            response = SuccessResponse(msg=SuccessConstants.CONTACT_UPDATE_SUCCESS)
 
-        response = SuccessResponse(msg=SuccessConstants.CONTACT_UPDATE_SUCCESS)
+        else:
+            response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
+
         return response
 
     except Exception as e:
@@ -96,11 +99,12 @@ def delete_contact(c_id):
     try:
         contact_obj = ContactList.objects.filter(id=c_id).first()
         if not contact_obj:
-            return None
+            response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
         else:
             contact_obj.delete()
             response = SuccessResponse(msg=SuccessConstants.CONTACT_DELETE_SUCCESS)
-            return response
+
+        return response
 
     except Exception as e:
         logger.error(ErrorConstants.CONTACT_DELETE_ERROR + str(e), exc_info=True)
@@ -114,13 +118,19 @@ def get_contacts():
         else:
             contact_obj = ContactList.objects.all()
             contact_obj_list = []
-            for contacts in contact_obj:
-                contact_obj_dict = {"id": contacts.id, "name": contacts.name, "number": contacts.number, "email": contacts.email}
-                contact_obj_list.append(contact_obj_dict)
-                contact_obj_list_json = json.dumps(contact_obj_list)
-            r_cache.set(get_contact_list(), contact_obj_list_json, CacheNameSpace.CONTACT_LIST[1])
+            if contact_obj:
+                for contacts in contact_obj:
+                    contact_obj_dict = {"id": contacts.id, "name": contacts.name, "number": contacts.number, "email": contacts.email}
+                    contact_obj_list.append(contact_obj_dict)
+                    contact_obj_list_json = json.dumps(contact_obj_list)
+                r_cache.set(get_contact_list(), contact_obj_list_json, CacheNameSpace.CONTACT_LIST[1])
 
-        return json.loads(contact_obj_list_json)
+            else:
+                response = ErrorResponse(msg=ErrorConstants.CONTACT_NOT_FOUND)
+                return response
+
+        response = ContactListResponse(json.loads(contact_obj_list_json))
+        return response
 
     except Exception as e:
         logger.error(ErrorConstants.CONTACT_LISTING_ERROR + str(e), exc_info=True)
